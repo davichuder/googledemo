@@ -18,9 +18,15 @@ public class UserService {
     private BCryptPasswordEncoder passwordEncoder;
 
     @Transactional
-    public void createUser(String email, String password) {
+    public void createUserWithEmail(String email, String password) {
         String encodedPassword = passwordEncoder.encode(password);
         User user = new User(email, encodedPassword);
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void createUserWithOpenId(String openId){
+        User user = new User(openId);
         userRepository.save(user);
     }
 
@@ -28,7 +34,7 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-    public User findByOAuth2Id(String oauth2Id) {
-        return userRepository.findByOAuth2Id(oauth2Id);
+    public User findByOpenId(String OpenId) {
+        return userRepository.findByOpenId(OpenId);
     }
 }

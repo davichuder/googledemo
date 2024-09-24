@@ -17,34 +17,34 @@ public class JwtUtil {
 
     public String generateToken(User user) {
         return Jwts.builder()
-                .setSubject(user.getUsername())
-                .setId(user.getOauth2Id())
+                .claim("email", user.getEmail())
+                .claim("openId", user.getOpenId())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 12)) // 12 hours
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
 
-    public String extractUsername(String token) {
+    public String extractEmail(String token) {
         return Jwts.parser()
                 .setSigningKey(secretKey)
                 .parseClaimsJws(token)
                 .getBody()
-                .getSubject();
+                .get("email", String.class);
     }
 
-    public String extractOAuth2Id(String token) {
+    public String extractOpenId(String token) {
         return Jwts.parser()
                 .setSigningKey(secretKey)
                 .parseClaimsJws(token)
                 .getBody()
-                .getId();
+                .get("openId", String.class);
     }
 
     public Boolean validateToken(String token, User user) {
-        String username = extractUsername(token);
-        String oauth2Id = extractUsername(token);
-        return (username.equals(user.getUsername()) || oauth2Id.equals(user.getOauth2Id()) ) && !isTokenExpired(token);
+        String username = extractEmail(token);
+        String openId = extractOpenId(token);
+        return (username.equals(user.getUsername()) || openId.equals(user.getOpenId()) ) && !isTokenExpired(token);
     }
 
     private Boolean isTokenExpired(String token) {

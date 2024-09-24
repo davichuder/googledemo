@@ -5,13 +5,12 @@ import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.der.googledemo.entity.User;
-import com.der.googledemo.service.UserService;
+import com.der.googledemo.repository.UserRepository;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,7 +21,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Autowired
-    private UserService userService;
+    private UserRepository userRepository;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -33,24 +32,23 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         final String authorizationHeader = request.getHeader("Authorization");
 
-        String username = null;
         String jwt = null;
-        String oauth2Id = null;
+        String email = null;
+        String openId = null;
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
-            username = jwtUtil.extractUsername(jwt);
-            oauth2Id = jwtUtil.extractOAuth2Id(jwt);
+            email = jwtUtil.extractEmail(jwt);
+            openId = jwtUtil.extractOpenId(jwt);
         }
 
-        if ((username != null) && SecurityContextHolder.getContext().getAuthentication() == null) {
-            User user = userService.findByEmail(username);
+        if ((email != null || openId != null) && SecurityContextHolder.getContext().getAuthentication() == null) {
+            User user = userRepository.findByEmail(email);
             if (user == null) {
-                user = userService.findByOAuth2Id(oauth2Id);
+                user = userRepository.findByOpenId(openId);
             }
 
             if (jwtUtil.validateToken(jwt, user)) {
-
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                         user, null, user.getAuthorities());
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
