@@ -25,7 +25,11 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         String openId = oAuth2User.getAttribute("sub");
         User user = userRepository.findByOpenId(openId);
-        String token = jwtUtil.generateToken(user);
+        if (user == null) {
+            user = new User(openId);
+            userRepository.save(user);
+        }
+        String token = jwtUtil.generateAccessToken(user);
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

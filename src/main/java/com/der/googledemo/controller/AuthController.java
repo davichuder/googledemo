@@ -6,7 +6,11 @@ import com.der.googledemo.config.JwtUtil;
 import com.der.googledemo.entity.User;
 import com.der.googledemo.service.UserService;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 import lombok.RequiredArgsConstructor;
+
+import java.io.IOException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +18,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,7 +53,7 @@ public class AuthController {
 
             // Si la autenticación es correcta, generamos el token JWT
             User user = (User) authentication.getPrincipal();
-            String jwt = jwtUtil.generateToken(user);
+            String jwt = jwtUtil.generateAccessToken(user);
 
             return ResponseEntity.ok(jwt);
         } catch (BadCredentialsException e) {
@@ -62,24 +65,8 @@ public class AuthController {
         }
     }
 
-    // @GetMapping("/login-with-google")
-    // public String loginWithGoogle(OAuth2AuthenticationToken authentication) {
-    //     String openId = authentication.getPrincipal().getAttribute("sub");
-    //     User user = userService.findByOpenId(openId);
-
-    //     if (user == null) {
-    //         // Crear el usuario si no existe
-    //         userService.createUserWithOpenId(openId);
-    //         user = userService.findByOpenId(openId);
-    //     }
-
-    //     // Generar JWT
-    //     String jwt = jwtUtil.generateToken(user);
-    //     return "Usuario autenticado con Google: " + jwt;
-    // }
-
     @GetMapping("/login-with-google")
-    public String loginGoogle() {
-        return "redirect:/oauth2/authorization/google";
+    public void loginGoogle(HttpServletResponse response) throws IOException {
+        response.sendRedirect("http://localhost:8080/oauth2/authorization/google");
     }
 }
