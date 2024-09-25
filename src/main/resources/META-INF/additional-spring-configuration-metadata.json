@@ -5,8 +5,8 @@
     "description": "Token for encript JWT"
   },
   {
-    "name": "jwt.expiration",
+    "name": "jwt.durationToken",
     "type": "java.lang.String",
-    "description": "Duration JWT in seconds"
+    "description": "Duration JWT in miliseconds"
   }
 ]}

@@ -6,9 +6,8 @@ import com.der.googledemo.config.JwtUtil;
 import com.der.googledemo.entity.User;
 import com.der.googledemo.service.UserService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,17 +22,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/auth/")
+@RequiredArgsConstructor
 public class AuthController {
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final UserService userService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
 
     @GetMapping("/run")
     public String getRun() {
@@ -58,7 +51,6 @@ public class AuthController {
             // Si la autenticación es correcta, generamos el token JWT
             User user = (User) authentication.getPrincipal();
             String jwt = jwtUtil.generateToken(user);
-            logger.info("JWT: generado", jwt);
 
             return ResponseEntity.ok(jwt);
         } catch (BadCredentialsException e) {
@@ -70,19 +62,24 @@ public class AuthController {
         }
     }
 
+    // @GetMapping("/login-with-google")
+    // public String loginWithGoogle(OAuth2AuthenticationToken authentication) {
+    //     String openId = authentication.getPrincipal().getAttribute("sub");
+    //     User user = userService.findByOpenId(openId);
+
+    //     if (user == null) {
+    //         // Crear el usuario si no existe
+    //         userService.createUserWithOpenId(openId);
+    //         user = userService.findByOpenId(openId);
+    //     }
+
+    //     // Generar JWT
+    //     String jwt = jwtUtil.generateToken(user);
+    //     return "Usuario autenticado con Google: " + jwt;
+    // }
+
     @GetMapping("/login-with-google")
-    public String loginWithGoogle(OAuth2AuthenticationToken authentication) {
-        String openId = authentication.getPrincipal().getAttribute("sub");
-        User user = userService.findByOpenId(openId);
-
-        if (user == null) {
-            // Crear el usuario si no existe
-            userService.createUserWithOpenId(openId);
-            user = userService.findByOpenId(openId);
-        }
-
-        // Generar JWT
-        String jwt = jwtUtil.generateToken(user);
-        return "Usuario autenticado con Google: " + jwt;
+    public String loginGoogle() {
+        return "redirect:/oauth2/authorization/google";
     }
 }
