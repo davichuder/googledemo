@@ -5,7 +5,9 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
 import com.der.googledemo.entity.User;
+import com.der.googledemo.payload.response.JwtResponse;
 import com.der.googledemo.repository.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,10 +31,14 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
             user = new User(openId);
             userRepository.save(user);
         }
-        String token = jwtUtil.generateAccessToken(user);
+        String accessToken = jwtUtil.generateAccessToken(user);
+        Long access_expires_in = jwtUtil.getAccessTokenDuration();
+        String refreshToken = jwtUtil.generateAccessToken(user);
+        Long refresh_expires_in = jwtUtil.getRefreshTokenDuration();
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().write("{\"token\":\"" + token + "\"}");
+        JwtResponse jwtResponse = new JwtResponse(accessToken, access_expires_in, refreshToken, refresh_expires_in);
+        response.getWriter().write(new ObjectMapper().writeValueAsString(jwtResponse));
     }
 }

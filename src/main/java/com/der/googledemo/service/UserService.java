@@ -35,4 +35,12 @@ public class UserService {
     public User findByOpenId(String openId) {
         return userRepository.findByOpenId(openId);
     }
+
+    public User findByEmailAndOpenId(String email, String openId) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            user = userRepository.findByOpenId(openId);
+        }
+        return user;
+    }
 }
