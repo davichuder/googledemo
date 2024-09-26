@@ -99,7 +99,7 @@ public class AuthController {
             String email = jwtUtil.extractEmail(refreshToken);
             String openId = jwtUtil.extractOpenId(refreshToken);
             User user = userService.findByEmailAndOpenId(email, openId);
-            String refresh_token = jwtUtil.generateAccessToken(user);
+            String refresh_token = jwtUtil.generateRefreshToken(user);
             Long refresh_expires_in = jwtUtil.getRefreshTokenDuration();
             
             return ResponseEntity.ok()
